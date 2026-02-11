@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LEGO Inventory Tracker</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header>
+    <h1>LEGO Inventory Tracker</h1>
+    <div class="header-actions">
+      <button id="sign-in-btn" class="btn btn-primary" onclick="signIn()">Sign in with Google</button>
+      <button id="sign-out-btn" class="btn btn-secondary hidden" onclick="signOut()">Sign Out</button>
+    </div>
+  </header>
+
+  <div id="status-message" class="status-message"></div>
+
+  <main>
+    <!-- Add Set Form -->
+    <section id="add-set-section" class="section hidden">
+      <h2>Add a LEGO Set</h2>
+
+      <!-- Scan & Lookup Area -->
+      <div class="scan-area">
+        <button type="button" id="scan-btn" class="btn btn-scan">Scan Barcode</button>
+        <button type="button" id="ocr-btn" class="btn btn-scan btn-ocr">Scan Set Number</button>
+        <div id="scanner-container" class="scanner-container hidden">
+          <div id="scanner-video"></div>
+          <div class="scanner-buttons">
+            <button type="button" id="ocr-capture-btn" class="btn btn-capture hidden" onclick="captureAndOcr()">Capture</button>
+            <button type="button" id="scanner-close-btn" class="btn btn-secondary scanner-close" onclick="stopScanner()">Cancel</button>
+          </div>
+        </div>
+        <div id="scanner-result" class="scanner-result hidden"></div>
+      </div>
+
+      <form id="add-set-form">
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="setNumber">Set Number *</label>
+            <div class="input-with-btn">
+              <input type="text" id="setNumber" name="setNumber" placeholder="e.g. 75192" required>
+              <button type="button" id="lookup-btn" class="btn btn-lookup">Lookup</button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="setName">Set Name *</label>
+            <input type="text" id="setName" name="setName" placeholder="e.g. Millennium Falcon" required>
+          </div>
+          <div class="form-group">
+            <label for="theme">Theme</label>
+            <input type="text" id="theme" name="theme" placeholder="e.g. Star Wars">
+          </div>
+          <div class="form-group">
+            <label for="pieces">Pieces</label>
+            <input type="number" id="pieces" name="pieces" placeholder="e.g. 7541">
+          </div>
+          <div class="form-group">
+            <label for="purchaseDate">Purchase Date</label>
+            <input type="date" id="purchaseDate" name="purchaseDate">
+          </div>
+          <div class="form-group">
+            <label for="retailPrice">Retail Price ($)</label>
+            <input type="number" id="retailPrice" name="retailPrice" step="0.01" placeholder="Auto-filled from lookup" readonly>
+          </div>
+          <div class="form-group">
+            <label for="purchasePrice">Purchase Price ($)</label>
+            <input type="number" id="purchasePrice" name="purchasePrice" step="0.01" placeholder="e.g. 849.99">
+          </div>
+          <div class="form-group">
+            <label for="store">Store</label>
+            <input type="text" id="store" name="store" placeholder="e.g. LEGO Store, Amazon">
+          </div>
+          <div class="form-group full-width">
+            <label for="notes">Notes</label>
+            <textarea id="notes" name="notes" placeholder="Any additional notes..."></textarea>
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Add Set</button>
+          </div>
+        </div>
+      </form>
+    </section>
+
+    <!-- Inventory List -->
+    <section id="inventory-section" class="section hidden">
+      <h2>My Inventory</h2>
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Set #</th>
+              <th>Name</th>
+              <th>Theme</th>
+              <th>Pieces</th>
+              <th>Retail</th>
+              <th>Paid</th>
+              <th>Store</th>
+              <th>Date Added</th>
+              <th>Built</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="inventory-body">
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <!-- Google API Scripts -->
+  <script src="https://apis.google.com/js/api.js"></script>
+  <script src="https://accounts.google.com/gsi/client"></script>
+
+  <!-- Barcode Scanner Library -->
+  <script src="https://unpkg.com/html5-qrcode"></script>
+  <!-- OCR Library -->
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+
+  <!-- App Scripts -->
+  <script src="js/config.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/sheets.js"></script>
+  <script src="js/scanner.js"></script>
+  <script src="js/rebrickable.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
