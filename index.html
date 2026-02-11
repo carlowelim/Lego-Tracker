@@ -3,8 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#D01012">
   <title>LEGO Inventory Tracker</title>
   <link rel="stylesheet" href="css/style.css">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
 </head>
 <body>
   <header>
@@ -16,6 +19,12 @@
   </header>
 
   <div id="status-message" class="status-message"></div>
+
+  <!-- Tab Navigation -->
+  <nav id="tab-navigation" class="tab-navigation hidden">
+    <button class="tab-btn active" data-tab="inventory">Inventory</button>
+    <button class="tab-btn" data-tab="wishlist">Wishlist</button>
+  </nav>
 
   <main>
     <!-- Add Set Form -->
@@ -38,6 +47,13 @@
 
       <form id="add-set-form">
         <div class="form-grid">
+          <div class="form-group">
+            <label for="add-target">Add to</label>
+            <select id="add-target">
+              <option value="inventory">Inventory</option>
+              <option value="wishlist">Wishlist</option>
+            </select>
+          </div>
           <div class="form-group">
             <label for="setNumber">Set Number *</label>
             <div class="input-with-btn">
@@ -84,6 +100,59 @@
       </form>
     </section>
 
+    <!-- Dashboard -->
+    <section id="dashboard-section" class="section hidden">
+      <h2>Dashboard</h2>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-label">Total Sets</div>
+          <div class="stat-value" id="stat-total-sets">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Total Pieces</div>
+          <div class="stat-value" id="stat-total-pieces">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Total Spent</div>
+          <div class="stat-value" id="stat-total-spent">$0.00</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Total Retail</div>
+          <div class="stat-value" id="stat-total-retail">$0.00</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Savings vs Retail</div>
+          <div class="stat-value positive" id="stat-savings">$0.00</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Built</div>
+          <div class="stat-value" id="stat-built">0 / 0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Market Value</div>
+          <div class="stat-value" id="stat-market-value">—</div>
+        </div>
+      </div>
+      <div class="theme-chart-section">
+        <h3>Sets by Theme</h3>
+        <div id="theme-chart" class="theme-chart"></div>
+      </div>
+    </section>
+
+    <!-- Inventory Toolbar -->
+    <div id="inventory-toolbar" class="inventory-toolbar hidden">
+      <input type="text" id="search-input" class="search-input" placeholder="Search sets...">
+      <select id="theme-filter" class="filter-select">
+        <option value="">All Themes</option>
+      </select>
+      <select id="built-filter" class="filter-select">
+        <option value="">All Status</option>
+        <option value="Yes">Built</option>
+        <option value="No">Unbuilt</option>
+      </select>
+      <button id="refresh-prices-btn" class="btn btn-refresh">Refresh Prices</button>
+    </div>
+
     <!-- Inventory List -->
     <section id="inventory-section" class="section hidden">
       <h2>My Inventory</h2>
@@ -91,19 +160,44 @@
         <table>
           <thead>
             <tr>
+              <th>Image</th>
+              <th data-sort="setNumber">Set #</th>
+              <th data-sort="setName">Name</th>
+              <th data-sort="theme">Theme</th>
+              <th data-sort="pieces">Pieces</th>
+              <th data-sort="retailPrice">Retail</th>
+              <th data-sort="purchasePrice">Paid</th>
+              <th data-sort="store">Store</th>
+              <th data-sort="dateAdded">Date Added</th>
+              <th>Built</th>
+              <th data-sort="marketValue">Market</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="inventory-body">
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Wishlist -->
+    <section id="wishlist-section" class="section hidden">
+      <h2>My Wishlist</h2>
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Image</th>
               <th>Set #</th>
               <th>Name</th>
               <th>Theme</th>
               <th>Pieces</th>
               <th>Retail</th>
-              <th>Paid</th>
-              <th>Store</th>
-              <th>Date Added</th>
-              <th>Built</th>
+              <th>Priority</th>
               <th>Actions</th>
             </tr>
           </thead>
-          <tbody id="inventory-body">
+          <tbody id="wishlist-body">
           </tbody>
         </table>
       </div>
@@ -125,6 +219,14 @@
   <script src="js/sheets.js"></script>
   <script src="js/scanner.js"></script>
   <script src="js/rebrickable.js"></script>
+  <script src="js/market.js"></script>
   <script src="js/app.js"></script>
+
+  <!-- Service Worker Registration -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js').catch(() => {});
+    }
+  </script>
 </body>
 </html>

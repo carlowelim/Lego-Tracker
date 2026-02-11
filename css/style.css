@@ -50,6 +50,37 @@ header h1 {
   align-items: center;
 }
 
+/* Tab Navigation */
+.tab-navigation {
+  display: flex;
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 16px 20px 0;
+  gap: 4px;
+}
+
+.tab-btn {
+  padding: 10px 24px;
+  border: none;
+  border-radius: var(--radius) var(--radius) 0 0;
+  background: var(--border);
+  color: var(--text-light);
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+
+.tab-btn.active {
+  background: var(--card-bg);
+  color: var(--lego-red);
+  box-shadow: 0 -2px 0 var(--lego-red) inset;
+}
+
+.tab-btn:hover:not(.active) {
+  background: #eee;
+}
+
 /* Buttons */
 .btn {
   display: inline-flex;
@@ -105,6 +136,47 @@ header h1 {
 .btn-delete:hover {
   background: var(--lego-red);
   color: white;
+}
+
+.btn-move {
+  background: none;
+  border: 1px solid var(--lego-green);
+  color: var(--lego-green);
+  padding: 6px 14px;
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 600;
+  min-height: 44px;
+  transition: background 0.2s, color 0.2s;
+}
+
+.btn-move:hover {
+  background: var(--lego-green);
+  color: white;
+}
+
+.btn-refresh {
+  background: var(--lego-blue);
+  color: white;
+  padding: 8px 16px;
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+
+.btn-refresh:hover {
+  background: #005a96;
+}
+
+.btn-refresh:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
 }
 
 /* Status message */
@@ -205,6 +277,55 @@ main {
   margin-top: 8px;
 }
 
+/* Set Thumbnail */
+.set-thumb {
+  width: 60px;
+  height: 60px;
+  object-fit: contain;
+  border-radius: 4px;
+  background: #f9f9f9;
+}
+
+.no-image {
+  color: var(--text-light);
+  font-size: 0.85rem;
+}
+
+/* Inventory Toolbar */
+.inventory-toolbar {
+  max-width: 1000px;
+  margin: 0 auto 12px;
+  padding: 0 20px;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.search-input {
+  flex: 1;
+  min-width: 180px;
+  padding: 10px 14px;
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 0.95rem;
+  min-height: 44px;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: var(--lego-blue);
+}
+
+.filter-select {
+  padding: 10px 12px;
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 0.9rem;
+  min-height: 44px;
+  background: white;
+}
+
 /* Inventory Table */
 .table-wrapper {
   overflow-x: auto;
@@ -228,6 +349,30 @@ thead th {
   white-space: nowrap;
 }
 
+thead th[data-sort] {
+  cursor: pointer;
+  user-select: none;
+}
+
+thead th[data-sort]:hover {
+  background: var(--lego-red-dark);
+}
+
+thead th[data-sort]::after {
+  content: '';
+  display: inline-block;
+  margin-left: 4px;
+  width: 0;
+}
+
+thead th.sort-asc::after {
+  content: ' \25B2';
+}
+
+thead th.sort-desc::after {
+  content: ' \25BC';
+}
+
 tbody td {
   padding: 10px;
   border-bottom: 1px solid var(--border);
@@ -243,6 +388,53 @@ tbody tr:hover {
   padding: 32px !important;
   color: var(--text-light);
   font-style: italic;
+}
+
+/* Market Value */
+.market-cell {
+  white-space: nowrap;
+}
+
+.no-market {
+  color: var(--text-light);
+}
+
+.appreciation {
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin-left: 4px;
+}
+
+.appreciation.up {
+  color: var(--lego-green);
+}
+
+.appreciation.down {
+  color: var(--lego-red);
+}
+
+/* Priority badges */
+.priority-badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.priority-high {
+  background: #ffeaea;
+  color: var(--lego-red);
+}
+
+.priority-medium {
+  background: #fff8e1;
+  color: #b8860b;
+}
+
+.priority-low {
+  background: #e8f5e9;
+  color: var(--lego-green);
 }
 
 /* Built toggle */
@@ -263,6 +455,100 @@ tbody tr:hover {
 .built-label {
   font-size: 0.85rem;
   font-weight: 500;
+}
+
+/* Dashboard */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.stat-card {
+  background: var(--bg);
+  border-radius: var(--radius);
+  padding: 16px;
+  text-align: center;
+}
+
+.stat-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-light);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+}
+
+.stat-value {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.stat-value.positive {
+  color: var(--lego-green);
+}
+
+.stat-value.negative {
+  color: var(--lego-red);
+}
+
+/* Theme Chart */
+.theme-chart-section h3 {
+  font-size: 1rem;
+  color: var(--text-light);
+  margin-bottom: 12px;
+}
+
+.theme-chart {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.chart-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.chart-label {
+  width: 120px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  text-align: right;
+  flex-shrink: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chart-bar-wrapper {
+  flex: 1;
+  background: var(--bg);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.chart-bar {
+  background: var(--lego-red);
+  color: white;
+  padding: 4px 8px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  border-radius: 4px;
+  min-width: 24px;
+  text-align: right;
+  transition: width 0.3s;
+}
+
+.chart-empty {
+  color: var(--text-light);
+  font-style: italic;
+  text-align: center;
+  padding: 16px;
 }
 
 /* Scan Area */
@@ -441,6 +727,15 @@ tbody tr:hover {
     text-align: center;
   }
 
+  .tab-navigation {
+    padding: 12px 12px 0;
+  }
+
+  .tab-btn {
+    flex: 1;
+    text-align: center;
+  }
+
   .form-grid {
     grid-template-columns: 1fr;
   }
@@ -451,6 +746,19 @@ tbody tr:hover {
 
   .section {
     padding: 16px;
+  }
+
+  .inventory-toolbar {
+    padding: 0 12px;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .chart-label {
+    width: 80px;
+    font-size: 0.75rem;
   }
 
   /* Card layout for table on mobile */
@@ -487,5 +795,14 @@ tbody tr:hover {
     color: var(--text-light);
     font-size: 0.85rem;
     margin-right: 12px;
+  }
+
+  .set-thumb {
+    width: 48px;
+    height: 48px;
+  }
+
+  .action-buttons {
+    justify-content: flex-end;
   }
 }

@@ -25,4 +25,7 @@ const COLUMNS = [
   'Date Added',
   'Barcode',
   'Retail Price',
+  'Image URL',
+  'Market Value',
+  'Value Date',
 ];
