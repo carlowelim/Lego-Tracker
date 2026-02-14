@@ -59,16 +59,27 @@ async function lookupMarketBrickEconomy(setNumber) {
 async function lookupMarketBrickOwl(setNumber) {
   const setNum = setNumber.includes('-') ? setNumber : setNumber + '-1';
 
-  // Step 1: Get BOID via API
-  const lookupUrl = `${BRICKOWL_BASE}/catalog/id_lookup?key=${CONFIG.BRICKOWL_API_KEY}&id=${setNum}&type=Set`;
-  const lookupResp = await fetch(lookupUrl);
-  if (!lookupResp.ok) return null;
+  // Step 1: Get BOID via API (proxied — BrickOwl API has no CORS headers)
+  const apiUrl = `${BRICKOWL_BASE}/catalog/id_lookup?key=${CONFIG.BRICKOWL_API_KEY}&id=${setNum}&type=Set`;
+  const lookupProxy = `https://api.allorigins.win/get?url=${encodeURIComponent(apiUrl)}`;
 
-  const lookupData = await lookupResp.json();
-  const boids = lookupData.boids || [];
-  if (boids.length === 0) return null;
-
-  const boid = boids[0];
+  let boid = null;
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try {
+      const lookupResp = await fetch(lookupProxy, { signal: AbortSignal.timeout(10000) });
+      if (!lookupResp.ok) return null;
+      const lookupText = await lookupResp.text();
+      const lookupWrapper = JSON.parse(lookupText);
+      const lookupData = JSON.parse(lookupWrapper.contents || '{}');
+      const boids = lookupData.boids || [];
+      if (boids.length === 0) return null;
+      boid = boids[0];
+      break;
+    } catch {
+      if (attempt === 1) return null;
+      await new Promise((r) => setTimeout(r, 2000));
+    }
+  }
 
   // Step 2: Scrape the catalog page for "Available from $X" price
   const catalogUrl = `https://www.brickowl.com/catalog/${boid}`;
