@@ -1,6 +1,6 @@
 // Service Worker for LEGO Inventory Tracker
 
-const CACHE_NAME = 'lego-tracker-v1';
+const CACHE_NAME = 'lego-tracker-v2';
 const LOCAL_ASSETS = [
   '/Lego-Tracker/',
   '/Lego-Tracker/index.html',
