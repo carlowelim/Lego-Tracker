@@ -456,6 +456,8 @@ async function refreshAllMarketValues() {
   const btn = document.getElementById('refresh-prices-btn');
   btn.disabled = true;
   const total = inventoryData.length;
+  let successCount = 0;
+  let accessDenied = false;
 
   for (let i = 0; i < total; i++) {
     const row = inventoryData[i];
@@ -468,6 +470,11 @@ async function refreshAllMarketValues() {
         await updateMarketValue(row.rowIndex, value, date);
         row.marketValue = value.toString();
         row.valueDate = date;
+        successCount++;
+      } else if (i === 0) {
+        // If the very first set returns null, likely an API access issue
+        accessDenied = true;
+        break;
       }
     } catch {
       // Skip sets that fail
@@ -481,9 +488,16 @@ async function refreshAllMarketValues() {
 
   btn.textContent = 'Refresh Prices';
   btn.disabled = false;
-  showStatus('Market values updated!');
-  applyFiltersAndSort();
-  updateDashboard();
+
+  if (accessDenied) {
+    showError('BrickOwl API key lacks catalog access. Enable "Access Brick Owl Catalog" at brickowl.com/api_key.');
+  } else if (successCount > 0) {
+    showStatus(`Market values updated for ${successCount} of ${total} sets.`);
+    applyFiltersAndSort();
+    updateDashboard();
+  } else {
+    showError('Could not retrieve market values. Check your BrickOwl API key permissions.');
+  }
 }
 
 // --- Standard handlers ---
