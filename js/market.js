@@ -2,8 +2,6 @@
 // 1. BrickEconomy search (for retired sets with New/Sealed value)
 // 2. BrickOwl catalog page (for sets with active listings)
 
-const BRICKOWL_BASE = 'https://api.brickowl.com/v1';
-
 async function lookupMarketValue(setNumber) {
   // Try BrickEconomy first (best for retired sets)
   try {
