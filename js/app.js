@@ -448,16 +448,10 @@ function renderThemeChart(data) {
 // --- Market Value ---
 
 async function refreshAllMarketValues() {
-  if (!CONFIG.BRICKOWL_API_KEY) {
-    showError('BrickOwl API key not configured.');
-    return;
-  }
-
   const btn = document.getElementById('refresh-prices-btn');
   btn.disabled = true;
   const total = inventoryData.length;
   let successCount = 0;
-  let accessDenied = false;
 
   for (let i = 0; i < total; i++) {
     const row = inventoryData[i];
@@ -471,33 +465,27 @@ async function refreshAllMarketValues() {
         row.marketValue = value.toString();
         row.valueDate = date;
         successCount++;
-      } else if (i === 0) {
-        // If the very first set returns null, likely an API access issue
-        accessDenied = true;
-        break;
       }
     } catch {
       // Skip sets that fail
     }
 
-    // Rate limit: 1 request per second
+    // Rate limit: 2 seconds between requests (BrickEconomy via proxy)
     if (i < total - 1) {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, 2000));
     }
   }
 
   btn.textContent = 'Refresh Prices';
   btn.disabled = false;
 
-  if (accessDenied) {
-    showError('BrickOwl API key lacks catalog access. Enable "Access Brick Owl Catalog" at brickowl.com/api_key.');
-  } else if (successCount > 0) {
-    showStatus(`Market values updated for ${successCount} of ${total} sets.`);
-    applyFiltersAndSort();
-    updateDashboard();
+  if (successCount > 0) {
+    showStatus(`Market values updated for ${successCount} of ${total} sets. Sets still at retail have no secondary market value.`);
   } else {
-    showError('Could not retrieve market values. Check your BrickOwl API key permissions.');
+    showStatus('No market values found. Sets still at retail don\'t have secondary market prices yet.');
   }
+  applyFiltersAndSort();
+  updateDashboard();
 }
 
 // --- Standard handlers ---
