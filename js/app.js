@@ -7,6 +7,20 @@ let wishlistData = [];
 let currentSort = { column: null, ascending: true };
 let activeTab = 'inventory';
 let searchDebounceTimer = null;
+let usdToPhp = CONFIG.USD_TO_PHP_FALLBACK;
+
+// Fetch live exchange rate on load
+fetch('https://api.exchangerate-api.com/v4/latest/USD')
+  .then((r) => r.json())
+  .then((d) => { if (d.rates && d.rates.PHP) usdToPhp = d.rates.PHP; })
+  .catch(() => {});
+
+function formatPHP(usdAmount) {
+  const val = parseFloat(usdAmount);
+  if (!val && val !== 0) return '';
+  const php = val * usdToPhp;
+  return CONFIG.CURRENCY_SYMBOL + php.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
 
 document.addEventListener('DOMContentLoaded', () => {
   // Wait for Google API scripts to load, then initialize
@@ -191,8 +205,8 @@ function renderInventory(rows) {
       <td data-label="Name">${escapeHtml(row.setName)}</td>
       <td data-label="Theme">${escapeHtml(row.theme)}</td>
       <td data-label="Pieces">${escapeHtml(row.pieces)}</td>
-      <td data-label="Retail">${row.retailPrice ? '$' + escapeHtml(row.retailPrice) : ''}</td>
-      <td data-label="Paid">${row.purchasePrice ? '$' + escapeHtml(row.purchasePrice) : ''}</td>
+      <td data-label="Retail">${row.retailPrice ? formatPHP(row.retailPrice) : ''}</td>
+      <td data-label="Paid">${row.purchasePrice ? formatPHP(row.purchasePrice) : ''}</td>
       <td data-label="Store">${escapeHtml(row.store)}</td>
       <td data-label="Date Added">${escapeHtml(row.dateAdded)}</td>
       <td data-label="Built">
@@ -226,7 +240,7 @@ function renderMarketValue(row) {
       indicator = `<span class="appreciation down">${pct}%</span>`;
     }
   }
-  return `$${market.toFixed(2)} ${indicator}`;
+  return `${formatPHP(market)} ${indicator}`;
 }
 
 // --- Search, Sort & Filter ---
@@ -330,7 +344,7 @@ async function loadWishlist() {
         <td data-label="Name">${escapeHtml(row.setName)}</td>
         <td data-label="Theme">${escapeHtml(row.theme)}</td>
         <td data-label="Pieces">${escapeHtml(row.pieces)}</td>
-        <td data-label="Retail">${row.retailPrice ? '$' + escapeHtml(row.retailPrice) : ''}</td>
+        <td data-label="Retail">${row.retailPrice ? formatPHP(row.retailPrice) : ''}</td>
         <td data-label="Priority"><span class="priority-badge priority-${escapeHtml(row.priority.toLowerCase())}">${escapeHtml(row.priority)}</span></td>
         <td data-label="Actions">
           <div class="action-buttons">
@@ -404,12 +418,12 @@ function updateDashboard() {
 
   document.getElementById('stat-total-sets').textContent = totalSets;
   document.getElementById('stat-total-pieces').textContent = totalPieces.toLocaleString();
-  document.getElementById('stat-total-spent').textContent = '$' + totalSpent.toFixed(2);
-  document.getElementById('stat-total-retail').textContent = '$' + totalRetail.toFixed(2);
-  document.getElementById('stat-savings').textContent = (savings >= 0 ? '$' : '-$') + Math.abs(savings).toFixed(2);
+  document.getElementById('stat-total-spent').textContent = formatPHP(totalSpent);
+  document.getElementById('stat-total-retail').textContent = formatPHP(totalRetail);
+  document.getElementById('stat-savings').textContent = (savings >= 0 ? '' : '-') + formatPHP(Math.abs(savings));
   document.getElementById('stat-savings').className = 'stat-value ' + (savings >= 0 ? 'positive' : 'negative');
   document.getElementById('stat-built').textContent = `${builtCount} / ${totalSets}`;
-  document.getElementById('stat-market-value').textContent = totalMarket > 0 ? '$' + totalMarket.toFixed(2) : '—';
+  document.getElementById('stat-market-value').textContent = totalMarket > 0 ? formatPHP(totalMarket) : '—';
 
   // Theme breakdown chart
   renderThemeChart(data);
@@ -617,7 +631,7 @@ async function fillFormFromRebrickable(setNumber) {
     // Store image URL for inclusion in row data
     scannedImageUrl = setData.imageUrl || '';
 
-    const priceInfo = setData.retailPrice ? ` — RRP $${setData.retailPrice}` : '';
+    const priceInfo = setData.retailPrice ? ` — RRP ${formatPHP(setData.retailPrice)}` : '';
     const info = `${setData.setNumber} — ${setData.setName} (${setData.pieces} pieces${priceInfo})`;
     showScannerResult(info, 'success');
   } catch (err) {

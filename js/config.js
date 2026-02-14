@@ -9,6 +9,9 @@ const CONFIG = {
   DISCOVERY_DOC: 'https://sheets.googleapis.com/$discovery/rest?version=v4',
   REBRICKABLE_API_KEY: 'c9fbaf5ef76f2efb744c9f95f8274853',
   BRICKOWL_API_KEY: '5b7463a92b7e511ca2a4ec18889359055c080b3e3d619ccbe44c79f1292ac289',
+  CURRENCY: 'PHP',
+  CURRENCY_SYMBOL: '₱',
+  USD_TO_PHP_FALLBACK: 58,
 };
 
 // Column headers matching the sheet
