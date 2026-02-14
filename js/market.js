@@ -1,7 +1,13 @@
 // Market Value Lookup
 // 1. BrickEconomy search (for retired sets with New/Sealed value)
 // 2. BrickOwl search page (for sets with active listings)
-// All requests go through allorigins CORS proxy — no direct API calls.
+// Requests go through multiple CORS proxies with fallback.
+
+const CORS_PROXIES = [
+  (url) => `https://corsproxy.io/?url=${encodeURIComponent(url)}`,
+  (url) => `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`,
+  (url) => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
+];
 
 async function lookupMarketValue(setNumber) {
   // Try BrickEconomy first (best for retired sets)
@@ -58,20 +64,37 @@ async function lookupMarketBrickOwl(setNumber) {
   return null;
 }
 
-// Shared helper: fetch a URL through allorigins CORS proxy with retry
+// Shared helper: fetch a URL through CORS proxies with fallback
+// Tries each proxy service in order until one succeeds
 async function fetchViaProxy(url) {
-  const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
+  for (let p = 0; p < CORS_PROXIES.length; p++) {
+    const proxyUrl = CORS_PROXIES[p](url);
 
-  for (let attempt = 0; attempt < 2; attempt++) {
-    try {
-      const resp = await fetch(proxyUrl, { signal: AbortSignal.timeout(15000) });
-      if (!resp.ok) return null;
-      const text = await resp.text();
-      const data = JSON.parse(text);
-      return data.contents || '';
-    } catch {
-      if (attempt === 1) return null;
-      await new Promise((r) => setTimeout(r, 2000));
+    for (let attempt = 0; attempt < 2; attempt++) {
+      try {
+        const resp = await fetch(proxyUrl, { signal: AbortSignal.timeout(20000) });
+        if (!resp.ok) {
+          if (attempt === 1) break; // try next proxy
+          await new Promise((r) => setTimeout(r, 2000));
+          continue;
+        }
+        const text = await resp.text();
+
+        // allorigins wraps response in JSON with a .contents field
+        if (proxyUrl.includes('allorigins.win')) {
+          try {
+            const data = JSON.parse(text);
+            return data.contents || '';
+          } catch {
+            return text;
+          }
+        }
+
+        return text;
+      } catch {
+        if (attempt === 1) break; // try next proxy
+        await new Promise((r) => setTimeout(r, 2000));
+      }
     }
   }
 
