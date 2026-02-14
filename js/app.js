@@ -15,11 +15,16 @@ fetch('https://api.exchangerate-api.com/v4/latest/USD')
   .then((d) => { if (d.rates && d.rates.PHP) usdToPhp = d.rates.PHP; })
   .catch(() => {});
 
-function formatPHP(usdAmount) {
+function usdToPhpConvert(usdAmount) {
   const val = parseFloat(usdAmount);
+  if (!val && val !== 0) return 0;
+  return Math.round(val * usdToPhp * 100) / 100;
+}
+
+function formatPHP(phpAmount) {
+  const val = parseFloat(phpAmount);
   if (!val && val !== 0) return '';
-  const php = val * usdToPhp;
-  return CONFIG.CURRENCY_SYMBOL + php.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  return CONFIG.CURRENCY_SYMBOL + val.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -472,11 +477,12 @@ async function refreshAllMarketValues() {
     btn.textContent = `Updating ${i + 1} of ${total}...`;
 
     try {
-      const value = await lookupMarketValue(row.setNumber);
-      if (value !== null) {
+      const valueUsd = await lookupMarketValue(row.setNumber);
+      if (valueUsd !== null) {
+        const valuePhp = usdToPhpConvert(valueUsd);
         const date = new Date().toISOString().split('T')[0];
-        await updateMarketValue(row.rowIndex, value, date);
-        row.marketValue = value.toString();
+        await updateMarketValue(row.rowIndex, valuePhp, date);
+        row.marketValue = valuePhp.toString();
         row.valueDate = date;
         successCount++;
       }
@@ -625,13 +631,16 @@ async function fillFormFromRebrickable(setNumber) {
     document.getElementById('theme').value = setData.theme;
     document.getElementById('pieces').value = setData.pieces;
     if (setData.retailPrice) {
-      document.getElementById('retailPrice').value = setData.retailPrice;
+      // Convert USD retail price to PHP for storage
+      const retailPhp = usdToPhpConvert(setData.retailPrice);
+      document.getElementById('retailPrice').value = retailPhp;
     }
 
     // Store image URL for inclusion in row data
     scannedImageUrl = setData.imageUrl || '';
 
-    const priceInfo = setData.retailPrice ? ` — RRP ${formatPHP(setData.retailPrice)}` : '';
+    const retailPhpVal = setData.retailPrice ? usdToPhpConvert(setData.retailPrice) : 0;
+    const priceInfo = retailPhpVal ? ` — RRP ${formatPHP(retailPhpVal)}` : '';
     const info = `${setData.setNumber} — ${setData.setName} (${setData.pieces} pieces${priceInfo})`;
     showScannerResult(info, 'success');
   } catch (err) {
