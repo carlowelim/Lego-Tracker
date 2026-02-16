@@ -1,13 +1,7 @@
 // Market Value Lookup
 // 1. BrickEconomy search (for retired sets with New/Sealed value)
 // 2. BrickOwl search page (for sets with active listings)
-// Requests go through multiple CORS proxies with fallback.
-
-const CORS_PROXIES = [
-  (url) => `https://corsproxy.io/?url=${encodeURIComponent(url)}`,
-  (url) => `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`,
-  (url) => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
-];
+// Uses Google Apps Script CORS proxy (configured in config.js)
 
 async function lookupMarketValue(setNumber) {
   // Try BrickEconomy first (best for retired sets)
@@ -64,37 +58,32 @@ async function lookupMarketBrickOwl(setNumber) {
   return null;
 }
 
-// Shared helper: fetch a URL through CORS proxies with fallback
-// Tries each proxy service in order until one succeeds
+// Shared helper: fetch a URL through the Google Apps Script CORS proxy
 async function fetchViaProxy(url) {
-  for (let p = 0; p < CORS_PROXIES.length; p++) {
-    const proxyUrl = CORS_PROXIES[p](url);
+  if (!CONFIG.CORS_PROXY_URL) {
+    console.warn('CORS_PROXY_URL not set in config.js. See gas-proxy.js for setup instructions.');
+    return null;
+  }
 
-    for (let attempt = 0; attempt < 2; attempt++) {
-      try {
-        const resp = await fetch(proxyUrl, { signal: AbortSignal.timeout(20000) });
-        if (!resp.ok) {
-          if (attempt === 1) break; // try next proxy
-          await new Promise((r) => setTimeout(r, 2000));
-          continue;
-        }
-        const text = await resp.text();
+  const proxyUrl = `${CONFIG.CORS_PROXY_URL}?url=${encodeURIComponent(url)}`;
 
-        // allorigins wraps response in JSON with a .contents field
-        if (proxyUrl.includes('allorigins.win')) {
-          try {
-            const data = JSON.parse(text);
-            return data.contents || '';
-          } catch {
-            return text;
-          }
-        }
-
-        return text;
-      } catch {
-        if (attempt === 1) break; // try next proxy
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try {
+      const resp = await fetch(proxyUrl, { signal: AbortSignal.timeout(30000) });
+      if (!resp.ok) {
+        if (attempt === 1) return null;
         await new Promise((r) => setTimeout(r, 2000));
+        continue;
       }
+      const data = await resp.json();
+      if (data.error) {
+        console.warn('Proxy error:', data.error);
+        return null;
+      }
+      return data.contents || '';
+    } catch {
+      if (attempt === 1) return null;
+      await new Promise((r) => setTimeout(r, 2000));
     }
   }
 

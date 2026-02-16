@@ -12,6 +12,8 @@ const CONFIG = {
   CURRENCY: 'PHP',
   CURRENCY_SYMBOL: '₱',
   USD_TO_PHP_FALLBACK: 58,
+  // Google Apps Script CORS proxy URL — deploy gas-proxy.js and paste the URL here
+  CORS_PROXY_URL: '',
 };
 
 // Column headers matching the sheet
