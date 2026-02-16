@@ -1,6 +1,6 @@
 // Service Worker for LEGO Inventory Tracker
 
-const CACHE_NAME = 'lego-tracker-v8';
+const CACHE_NAME = 'lego-tracker-v9';
 const LOCAL_ASSETS = [
   '/Lego-Tracker/',
   '/Lego-Tracker/index.html',
@@ -50,7 +50,9 @@ self.addEventListener('fetch', (event) => {
     url.hostname === 'api.brickowl.com' ||
     url.hostname === 'api.upcitemdb.com' ||
     url.hostname === 'brickset.com' ||
-    url.hostname === 'api.allorigins.win'
+    url.hostname === 'api.allorigins.win' ||
+    url.hostname === 'corsproxy.io' ||
+    url.hostname === 'api.codetabs.com'
   ) {
     return; // Let the browser handle these normally
   }

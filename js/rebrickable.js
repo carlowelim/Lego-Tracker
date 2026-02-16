@@ -76,15 +76,11 @@ async function searchSets(query) {
 
 async function lookupRetailPrice(setNum) {
   // Fetch Brickset set page and extract USD RRP
-  // setNum should be in format "75375-1"
+  // Uses fetchViaProxy (from market.js) for multi-proxy fallback
   const bricksetUrl = `https://brickset.com/sets/${setNum}`;
-  const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(bricksetUrl)}`;
-  const response = await fetch(proxyUrl);
+  const html = await fetchViaProxy(bricksetUrl);
+  if (!html) return '';
 
-  if (!response.ok) return '';
-
-  const data = await response.json();
-  const html = data.contents || '';
   // RRP line looks like: <dd>£74.99/$84.99/€84.99</dd>
   const rrpMatch = html.match(/RRP<\/dt>\s*<dd>[^<]*\$([\d.]+)/);
   if (rrpMatch) {
@@ -98,12 +94,9 @@ async function lookupBarcode(barcode) {
   // Brickset has the most complete LEGO barcode database
   try {
     const bricksetUrl = `https://brickset.com/sets?query=${encodeURIComponent(barcode)}`;
-    const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(bricksetUrl)}`;
-    const response = await fetch(proxyUrl);
+    const html = await fetchViaProxy(bricksetUrl);
 
-    if (response.ok) {
-      const data = await response.json();
-      const html = data.contents || '';
+    if (html) {
       // Extract set number from Brickset search results page
       // Links look like: /sets/75375-1/Millennium-Falcon
       const match = html.match(/\/sets\/(\d+)-\d+\/([^'"]+)/);
