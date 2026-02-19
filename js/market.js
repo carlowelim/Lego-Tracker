@@ -69,19 +69,33 @@ async function fetchViaProxy(url) {
 
   for (let attempt = 0; attempt < 2; attempt++) {
     try {
-      const resp = await fetch(proxyUrl, { signal: AbortSignal.timeout(30000) });
+      const resp = await fetch(proxyUrl, {
+        signal: AbortSignal.timeout(30000),
+        redirect: 'follow',
+      });
+      console.log(`Proxy response for ${url}: status=${resp.status}, type=${resp.type}`);
       if (!resp.ok) {
+        console.warn(`Proxy HTTP error: ${resp.status} ${resp.statusText}`);
         if (attempt === 1) return null;
         await new Promise((r) => setTimeout(r, 2000));
         continue;
       }
-      const data = await resp.json();
-      if (data.error) {
-        console.warn('Proxy error:', data.error);
-        return null;
+      const text = await resp.text();
+      console.log(`Proxy response length: ${text.length}, preview: ${text.substring(0, 100)}`);
+      // GAS returns JSON: {"contents": "...html..."}
+      try {
+        const data = JSON.parse(text);
+        if (data.error) {
+          console.warn('Proxy error:', data.error);
+          return null;
+        }
+        return data.contents || '';
+      } catch {
+        // If not JSON, return raw text (might be the HTML directly)
+        return text;
       }
-      return data.contents || '';
-    } catch {
+    } catch (err) {
+      console.warn(`Proxy fetch error (attempt ${attempt + 1}):`, err.message || err);
       if (attempt === 1) return null;
       await new Promise((r) => setTimeout(r, 2000));
     }
