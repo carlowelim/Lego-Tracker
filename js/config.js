@@ -13,7 +13,7 @@ const CONFIG = {
   CURRENCY_SYMBOL: '₱',
   USD_TO_PHP_FALLBACK: 58,
   // Google Apps Script CORS proxy URL — deploy gas-proxy.js and paste the URL here
-  CORS_PROXY_URL: '',
+  CORS_PROXY_URL: 'https://script.google.com/macros/s/AKfycbzVWzwdgEYF5Jv29F0gDIHR_GmwdQNrbwkr43qEeYcnc2GDQraph-jophRQ1wV-aF97tw/exec',
 };
 
 // Column headers matching the sheet
